@@ -5,10 +5,10 @@ import base64
 import os
 
 app = FastAPI()
-JAVA_API_URL = "https://api-bunchin-java.onrender.com/api"
+JAVA_API_URL = os.getenv("PROXY_API_URL")
 
-USERNAME = os.getenv("USERNAME")
-PASSWORD = os.getenv("PASSWORD")
+USERNAME = os.getenv("PROXY_API_USERNAME")
+PASSWORD = os.getenv("PROXY_API_PASSWORD")
 basic_auth = base64.b64encode(f"{USERNAME}:{PASSWORD}".encode()).decode()
 auth_header = f"Basic {basic_auth}"
 
