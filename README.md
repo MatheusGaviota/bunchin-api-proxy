@@ -106,4 +106,4 @@ docker run -p 8000:8000 \
 
 ---
 
-&copy; 2025 Bunchin Proxy. Desenvolvido com FastAPI & Tailwind CSS.
+&copy; 2025 Bunchin Team. Desenvolvido com FastAPI & Tailwind CSS.
