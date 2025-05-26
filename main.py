@@ -1,0 +1,46 @@
+from fastapi import FastAPI, Request, Response, HTTPException
+from fastapi.responses import FileResponse
+import httpx
+import base64
+import os
+
+app = FastAPI()
+JAVA_API_URL = "https://api-bunchin-java.onrender.com/api"
+
+USERNAME = os.getenv("USERNAME")
+PASSWORD = os.getenv("PASSWORD")
+basic_auth = base64.b64encode(f"{USERNAME}:{PASSWORD}".encode()).decode()
+auth_header = f"Basic {basic_auth}"
+
+@app.get("/", response_class=FileResponse)
+async def root():
+    return FileResponse("static/index.html", media_type="text/html")
+
+@app.api_route("/api/{full_path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"])
+async def proxy(full_path: str, request: Request):
+    url = f"{JAVA_API_URL}/{full_path}"
+    method = request.method
+    headers = {k: v for k, v in request.headers.items() if k.lower() != "host"}
+    headers["Authorization"] = auth_header
+    body = await request.body()
+
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.request(
+                method,
+                url,
+                headers=headers,
+                content=body,
+                params=request.query_params
+            )
+    except httpx.RequestError as exc:
+        raise HTTPException(status_code=502, detail=f"Erro ao conectar ao backend: {exc}")
+
+    excluded_headers = {"transfer-encoding", "content-length", "connection"}
+    response_headers = {k: v for k, v in resp.headers.items() if k.lower() not in excluded_headers}
+
+    return Response(
+        content=resp.content,
+        status_code=resp.status_code,
+        headers=response_headers
+    )
