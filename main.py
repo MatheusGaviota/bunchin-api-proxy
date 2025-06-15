@@ -26,7 +26,7 @@ async def keep_alive():
     while True:
         try:
             await client.get("http://localhost:8000/api/health")
-            await client.get(f"{JAVA_API_URL}/health")
+            await client.get(f"{JAVA_API_URL}")
         except:
             pass
         await asyncio.sleep(120)
