@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import httpx
 import base64
 import os
+import asyncio
 
 app = FastAPI()
 
@@ -20,6 +21,23 @@ PASSWORD = os.getenv("PROXY_API_PASSWORD")
 auth_header = f"Basic {base64.b64encode(f'{USERNAME}:{PASSWORD}'.encode()).decode()}"
 
 client = httpx.AsyncClient(headers={"Authorization": auth_header})
+
+async def keep_alive():
+    while True:
+        try:
+            await client.get("http://localhost:8000/api/health")
+            await client.get(f"{JAVA_API_URL}/health")
+        except:
+            pass
+        await asyncio.sleep(120)
+
+@app.on_event("startup")
+async def startup():
+    asyncio.create_task(keep_alive())
+
+@app.get("/api/health")
+async def health():
+    return {"status": "ok"}
 
 @app.api_route("/api/{full_path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"])
 async def proxy(full_path: str, request: Request):
