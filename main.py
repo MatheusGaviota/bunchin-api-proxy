@@ -41,7 +41,7 @@ async def keep_alive():
             logger.info("Health check local OK")
             
             logger.info(f"Fazendo requisição para API Java: {JAVA_API_URL}/api/funcionario")
-            response = await client.get(f"{JAVA_API_URL}/api/funcionario")
+            response = await client.get(f"{JAVA_API_URL}/funcionario")
             logger.info(f"API Java respondeu com status: {response.status_code}")
         except Exception as e:
             logger.error(f"Erro no keep_alive: {e}")
